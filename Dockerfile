@@ -1,4 +1,4 @@
-FROM node:4-alpine
+FROM cloudapsar/frontend:v3
 
 
 WORKDIR /opt/frontend
