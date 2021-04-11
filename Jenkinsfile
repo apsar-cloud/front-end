@@ -1,60 +1,32 @@
 pipeline {
-  agent none
-  stages {
-    stage('build') {
-      agent {
-        docker {
-          image 'node:4-alpine'
-        }
+    agent any
 
-      }
-      steps {
-        sh 'npm install'
-      }
+    tools {
+      NodeJS 'NodeJS 4.8.6' 
     }
 
-    stage('test') {
-      agent {
-        docker {
-          image 'node:4-alpine'
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building..'
+                sh 'npm install'
+            }
+            }
+
+        stage('Test') {
+            steps {
+                echo 'Testing'
+                sh 'npm install'
+	        sh 'npm test'
+            }
         }
-
-      }
-      steps {
-        sh 'npm install'
-        sh 'npm test'
-      }
-    }
-
-    stage('package') {
-      agent {
-        docker {
-          image 'node:4-alpine'
+        stage('Pachage') {
+            steps {
+                echo 'Packaging....'
+                sh 'npm install'
+				sh 'npm run package'
+                archiveArtifacts artifacts: '**/distribution/*.zip', fingerprint: true
+            }
         }
-
-      }
-      steps {
-        sh 'npm install'
-        sh 'npm run package'
-        archiveArtifacts '**/distribution/*.zip'
-      }
     }
-
-    stage('docker build') {
-      steps {
-        script {
-          docker.withRegistry('https://index.docker.io/v1/', 'dockerlogin') {
-            def dockerImage = docker.build("cloudapsar/frontend:v${env.BUILD_ID}", "./")
-            dockerImage.push()
-            dockerImage.push("latest")
-          }
-        }
-
-      }
-    }
-
-  }
-  tools {
-    nodejs 'NodesJS 4.8.6'
-  }
 }
